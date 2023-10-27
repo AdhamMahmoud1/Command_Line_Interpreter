@@ -3,16 +3,16 @@ package com;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Queue;
+import java.util.ArrayList;
 
 
 public class Terminal {
 
     private Parser parser;
-    private Queue<String> history;
+    private ArrayList<String> history = new ArrayList<String>();
 
     public void echo(String[] args) {
-        System.out.println("echo " + String.join(" ", args));
+        System.out.println(String.join(" ", args));
     }
 
 
@@ -56,9 +56,10 @@ public class Terminal {
         System.out.println("wc " + path);
     }
 
-    public Queue<String> history() {
-        System.out.println("history");
-        return null;
+    public void history() {
+        for (int i = 1; i <= history.size(); i++) {
+            System.out.println(i + " " + history.get(i));
+        }  
     }
 
 
@@ -91,6 +92,58 @@ public class Terminal {
     }
 
     public void chooseCommandAction() {
+        String command = parser.getCommandName();
+        String[] args = parser.getArgs();
+        switch (command) {
+            case "echo":
+                echo(args);
+                this.history.add("echo");
+                break;
+            case "pwd":
+                System.out.println(pwd());
+                this.history.add("pwd");
+                break;
+            case "cd":
+                cd(args[0]);
+                this.history.add("cd");
+                break;
+            case "ls":
+                ls();
+                this.history.add("ls");
+                break;
+            case "mkdir":
+                makeDir(args[0]);
+                break;
+            case "rmdir":
+                rmdir(args[0]);
+                history.add("rmdir");
+                break;
+            case "touch":
+                touch(args[0]);
+                history.add("touch");
+                break;
+            case "cp":
+                cp(args[0], args[1]);
+                break;
+            case "rm":
+                rm(args[0]);
+                history.add("rm");
+                break;
+            case "cat":
+                cat(args[0]);
+                history.add("cat");
+                break;
+            case "wc":
+                wc(args[0]);
+                history.add("wc");
+                break;
+            case "history":
+                history();
+                history.add("history");
+                break;
+            default:
+                System.out.println("Command not found");
+        }
 
     }
     
