@@ -4,12 +4,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 
 
 public class Terminal {
 
     private Parser parser;
+    private Path path;
     private ArrayList<String> history = new ArrayList<String>();
+
+    public Terminal() {
+        path = Paths.get(System.getProperty("user.dir"));
+    }
 
     public void echo(String[] args) {
         System.out.println(String.join(" ", args));
@@ -17,12 +26,43 @@ public class Terminal {
 
 
     public String pwd() {
-        return System.getProperty("user.dir");
+        return path.toString();
     }
 
     public void cd(String path) {
-        System.setProperty("user.dir", path);
+        if (path.equals(".")) {
+            return;
+        }
+        Path pathToCheck = this.path.resolve(path);
+        if (path.equals("..")) {
+            Path parent = this.path.getParent();
+            if (parent != null) {
+                this.path = parent;
+            }
+            else {
+                System.out.println("You are in root directory");
+            }  
+        }
+        else if (Files.isDirectory(pathToCheck)) {
+            if (Files.exists(pathToCheck)) {
+                this.path = pathToCheck;
+                
+            } else {
+                System.out.println("Path is not exist");
+
+            }
+        }
+        else {
+            System.out.println("It's not a directory");
+        }
+        
+            
     }
+
+    public void cd() {
+        this.path = Path.of(System.getProperty("user.dir"));
+    }
+
 
     public void ls() {
         System.out.println("ls");
@@ -57,8 +97,8 @@ public class Terminal {
     }
 
     public void history() {
-        for (int i = 1; i <= history.size(); i++) {
-            System.out.println(i + " " + history.get(i));
+        for (int i = 0; i < history.size(); i++) {
+            System.out.println((i + 1) + " " + history.get(i));
         }  
     }
 
@@ -68,7 +108,7 @@ public class Terminal {
         String input;
         parser = new Parser();
         while (true) {
-            System.out.print(pwd() + " $ ");
+            System.out.print(pwd() + " $");
             try {
                 input = reader.readLine();
             } catch (IOException e) {
@@ -104,9 +144,16 @@ public class Terminal {
                 this.history.add("pwd");
                 break;
             case "cd":
-                cd(args[0]);
-                this.history.add("cd");
-                break;
+                if (args.length == 0) {
+                    cd();
+                    this.history.add("cd");
+                    break;
+                }
+                else {
+                    cd(args[0]);
+                    this.history.add("cd");
+                    break;
+                }
             case "ls":
                 ls();
                 this.history.add("ls");
