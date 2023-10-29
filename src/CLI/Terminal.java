@@ -1,27 +1,64 @@
-package com;
+package CLI;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 
 public class Terminal {
 
     private Parser parser;
+    private Path path;
     private ArrayList<String> history = new ArrayList<String>();
+    public Terminal() {
+        path = Paths.get(System.getProperty("user.dir"));
+    }
+
 
     public void echo(String[] args) {
         System.out.println(String.join(" ", args));
     }
 
-
     public String pwd() {
-        return System.getProperty("user.dir");
+        return path.toString();
     }
+
 
     public void cd(String path) {
         System.setProperty("user.dir", path);
+        if (path.equals(".")) {
+            return;
+        }
+        Path pathToCheck = this.path.resolve(path);
+        if (path.equals("..")) {
+            Path parent = this.path.getParent();
+            if (parent != null) {
+                this.path = parent;
+            }
+            else {
+                System.out.println("You are in root directory");
+            }
+        }
+        else if (Files.isDirectory(pathToCheck)) {
+            if (Files.exists(pathToCheck)) {
+                this.path = pathToCheck;
+
+            } else {
+                System.out.println("Path is not exist");
+
+            }
+        }
+        else {
+            System.out.println("It's not a directory");
+        }
+
+
+    }
+
+    public void cd() {
+        this.path = Path.of(System.getProperty("user.dir"));
     }
 
     public void ls() {
@@ -29,8 +66,9 @@ public class Terminal {
     }
 
     public void makeDir(String path) {
-        System.out.println("mkdir " + path);
+
     }
+
 
     public void rmdir(String path) {
         System.out.println("rmdir " + path);
@@ -40,35 +78,64 @@ public class Terminal {
         System.out.println("touch " + path);
     }
 
-    public void cp(String path1, String path2) {
-        System.out.println("cp " + path1 + " " + path2);
+    public void cp(String src, String dest)throws  IOException {
+        File file = new File(src);
+        if (!file.exists()) {
+            System.out.println("File doesn't exist");
+            return;
+        }
+        File file2 = new File(dest);
+        if (!file2.exists()) {
+            file2.createNewFile();
+        }
+        try (FileInputStream in = new FileInputStream(file)) {
+            try (FileOutputStream out = new FileOutputStream(file2)) {
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+            }
+        }
     }
 
-    public void rm(String path) {
-        System.out.println("rm " + path);
+
+
+
+    public Boolean rm(String Filename) {
+        String currentDirectory = pwd();
+        File file = new File (currentDirectory , Filename);
+        if (file.exists()){
+            file.delete();
+            System.out.println("The file is deleted successfully");
+            return true;
+        }
+        else {
+            System.out.println("The file is not in the current directory");
+            return false;
+        }
     }
-    
+
     public void cat(String path) {
         System.out.println("cat " + path);
     }
-    
+
     public void wc(String path) {
         System.out.println("wc " + path);
     }
 
     public void history() {
-        for (int i = 1; i <= history.size(); i++) {
-            System.out.println(i + " " + history.get(i));
-        }  
+        for (int i = 0; i < history.size(); i++) {
+            System.out.println((i + 1) + " " + history.get(i));
+        }
     }
-
 
     public void run() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String input;
         parser = new Parser();
         while (true) {
-            System.out.print(pwd() + " $ ");
+            System.out.print(pwd() + " $");
             try {
                 input = reader.readLine();
             } catch (IOException e) {
@@ -104,9 +171,16 @@ public class Terminal {
                 this.history.add("pwd");
                 break;
             case "cd":
-                cd(args[0]);
-                this.history.add("cd");
-                break;
+                if (args.length == 0) {
+                    cd();
+                    this.history.add("cd");
+                    break;
+                }
+                else {
+                    cd(args[0]);
+                    this.history.add("cd");
+                    break;
+                }
             case "ls":
                 ls();
                 this.history.add("ls");
@@ -123,7 +197,11 @@ public class Terminal {
                 history.add("touch");
                 break;
             case "cp":
-                cp(args[0], args[1]);
+                try {
+                    cp(args[0],args[1]);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 break;
             case "rm":
                 rm(args[0]);
@@ -146,6 +224,5 @@ public class Terminal {
         }
 
     }
-    
 
 }
