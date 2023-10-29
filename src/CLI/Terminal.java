@@ -5,6 +5,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Collections;
 
 
 public class Terminal {
@@ -12,13 +18,16 @@ public class Terminal {
     private Parser parser;
     private Path path;
     private ArrayList<String> history = new ArrayList<String>();
+
     public Terminal() {
+        parser = new Parser();
         path = Paths.get(System.getProperty("user.dir"));
     }
 
 
-    public void echo(String[] args) {
+    public String echo(String[] args) {
         System.out.println(String.join(" ", args));
+        return String.join(" ", args);
     }
 
     public String pwd() {
@@ -64,8 +73,24 @@ public class Terminal {
     }
 
     public void ls() {
-        System.out.println("ls");
+        File file = new File(pwd());
+        String[] files = file.list();
+        Arrays.sort(files);
+        for (String name : files) {
+            System.out.println(name);
+        }
     }
+
+    public void  lsr() {
+        File file = new File(pwd());
+        String[] files = file.list();
+        Arrays.sort(files, Collections.reverseOrder());
+        for (String name : files) {
+            System.out.println(name);
+        }
+    }
+
+    
 
     public void makeDir(String path) {
 
@@ -132,7 +157,7 @@ public class Terminal {
         }
     }
 
-    public void run() {
+    public void run() throws IOException{
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String input;
         parser = new Parser();
@@ -160,7 +185,7 @@ public class Terminal {
         System.out.println("exit");
     }
 
-    public void chooseCommandAction() {
+    public void chooseCommandAction() throws IOException {
         String command = parser.getCommandName();
         String[] args = parser.getArgs();
         switch (command) {
@@ -184,9 +209,20 @@ public class Terminal {
                     break;
                 }
             case "ls":
-                ls();
-                this.history.add("ls");
-                break;
+                if (args.length == 0) {
+                    ls();
+                    this.history.add("ls");
+                    break;
+                }
+                else if (args[0].equals("-r")) {
+                    lsr();
+                    this.history.add("ls");
+                    break;
+                }
+                else {
+                    System.out.println("Command not found");
+                    break;
+                }
             case "mkdir":
                 makeDir(args[0]);
                 break;
