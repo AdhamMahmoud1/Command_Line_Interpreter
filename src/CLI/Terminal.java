@@ -27,7 +27,7 @@ public class Terminal {
 
 
     public void cd(String path) {
-        System.setProperty("user.dir", path);
+        
         if (path.equals(".")) {
             return;
         }
@@ -36,6 +36,7 @@ public class Terminal {
             Path parent = this.path.getParent();
             if (parent != null) {
                 this.path = parent;
+                System.setProperty("user.dir", parent.toString());
             }
             else {
                 System.out.println("You are in root directory");
@@ -44,6 +45,7 @@ public class Terminal {
         else if (Files.isDirectory(pathToCheck)) {
             if (Files.exists(pathToCheck)) {
                 this.path = pathToCheck;
+                System.setProperty("user.dir", this.path.toString());
 
             } else {
                 System.out.println("Path is not exist");
@@ -58,7 +60,7 @@ public class Terminal {
     }
 
     public void cd() {
-        this.path = Path.of(System.getProperty("user.dir"));
+    this.path = Paths.get(System.getProperty("user.dir"));
     }
 
     public void ls() {
