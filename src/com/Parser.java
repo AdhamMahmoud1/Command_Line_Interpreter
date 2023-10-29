@@ -1,4 +1,4 @@
-package CLI;
+package com;
 
 public class Parser {
     private String commandName;
