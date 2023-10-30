@@ -6,10 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Collections;
 
 
@@ -102,8 +98,28 @@ public class Terminal {
     }
 
     public void touch(String path) {
-        System.out.println("touch " + path);
+        try {
+            File file = new File(path);
+            if (file.exists()) {
+                System.out.println("File already exists.");
+            } else {
+                File parentDirectory = file.getParentFile();
+                if (parentDirectory != null && !parentDirectory.exists()) {
+                    parentDirectory.mkdirs();
+                }
+
+                if (file.createNewFile()) {
+                    System.out.println("File created: " + path);
+                } else {
+                    System.out.println("Failed to create the file: " + path);
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+    
 
     public void cp(String src, String dest)throws  IOException {
         File file = new File(src);
