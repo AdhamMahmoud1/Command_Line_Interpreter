@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 
 
 public class Terminal {
@@ -88,14 +89,58 @@ public class Terminal {
 
     
 
-    public void makeDir(String path) {
+    public void makeDir(String[] args) {
+        for (String argument : args) {
+            File directory = new File(argument);
+            if (!directory.exists()) {
+                if (directory.mkdir()) {
+                } else {
+                    System.out.println("Error creating directory");
+                }
+            } else {
+                System.out.println("Directory already exists: " + argument);
+            }
+        }
+    }
+
+
+
+    public void rmdir(String arg) {
+        File directory;
+
+        if (Objects.equals(arg, "*")) {
+            directory = new File(pwd());
+            if (!directory.exists() || !directory.isDirectory()) {
+                System.out.println("directory not found");
+                return;
+            }
+
+            File[] files = directory.listFiles();
+
+            for (File file : files) {
+                if (file.isDirectory() && file.listFiles().length == 0) {
+                    file.delete();
+                }
+            }
+        } else {
+            directory = new File(arg);
+            if (directory.exists() && directory.isDirectory()) {
+                if (directory.listFiles().length == 0) {
+                    directory.delete();
+                } else {
+                    System.out.println("directory not empty");
+                }
+            } else {
+                System.out.println("directory not found");
+            }
+        }
+
 
     }
 
 
-    public void rmdir(String path) {
-        System.out.println("rmdir " + path);
-    }
+
+
 
     public void touch(String path) {
         try {
@@ -240,7 +285,7 @@ public class Terminal {
                     break;
                 }
             case "mkdir":
-                makeDir(args[0]);
+                makeDir(args);
                 break;
             case "rmdir":
                 rmdir(args[0]);
