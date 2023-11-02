@@ -135,11 +135,7 @@ public class Terminal {
                 System.out.println("directory not found");
             }
         }
-
-
     }
-
-
 
 
 
@@ -394,13 +390,16 @@ public class Terminal {
                 history.add("rm");
                 break;
             case "cat":
-                try {
+                if (args.length == 2) {
                     cat(args[0], args[1]);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    history.add("cat");
+                    break;
                 }
-                history.add("cat");
-                break;
+                else {
+                    System.out.println("Command not found");
+                    break;
+                }
+                
             case "wc":
                 try {
                     wc(args[0]);
