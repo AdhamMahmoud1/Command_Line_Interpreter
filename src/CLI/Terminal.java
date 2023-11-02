@@ -86,7 +86,7 @@ public class Terminal {
     this.path = Paths.get(System.getProperty("user.dir"));
     }
 
-    public void ls() {
+    public void ls(String[] args) {
         File file = new File(pwd());
         String[] files = file.list();
         Arrays.sort(files);
@@ -113,7 +113,7 @@ public class Terminal {
         }
     }
 
-    public void  lsr() {
+    public void  lsr(String[] args) {
         File file = new File(pwd());
         String[] files = file.list();
         Arrays.sort(files, Collections.reverseOrder());
