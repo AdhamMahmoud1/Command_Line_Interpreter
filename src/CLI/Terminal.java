@@ -24,7 +24,23 @@ public class Terminal {
 
 
     public String echo(String[] args) {
-        System.out.println(String.join(" ", args));
+        if (args[args.length - 1].matches("([A-Z]:){0,1}[a-zA-Z0-9/]+.txt") && args[args.length - 2].equals(">")){
+            try {
+                writeToFile(String.join(" ", Arrays.copyOfRange(args, 0, args.length-2)), args[args.length - 1], false);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        else if (args[args.length - 1].matches("[/a-zA-Z0-9]+.txt") && args[args.length - 2].equals(">>")){
+            try {
+                writeToFile(String.join(" ", Arrays.copyOfRange(args, 0, args.length-2)), args[args.length - 1], true);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        else{
+            System.out.println(String.join(" ", args));
+        }
         return String.join(" ", args);
     }
 
@@ -74,8 +90,26 @@ public class Terminal {
         File file = new File(pwd());
         String[] files = file.list();
         Arrays.sort(files);
+        String output = "";
         for (String name : files) {
-            System.out.println(name);
+            output += name + '\n';
+        }
+        if (args[args.length - 1].matches("([A-Z]:){0,1}[/a-zA-Z0-9]+.txt") && args[args.length - 2].equals(">")){
+            try {
+                writeToFile(output, args[args.length - 1], false);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        else if (args[args.length - 1].matches("([A-Z]:){0,1}[/a-zA-Z0-9]+.txt") && args[args.length - 2].equals(">>")){
+            try {
+                writeToFile(output, args[args.length - 1], true);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        else{
+            System.out.println(output);
         }
     }
 
@@ -83,8 +117,26 @@ public class Terminal {
         File file = new File(pwd());
         String[] files = file.list();
         Arrays.sort(files, Collections.reverseOrder());
+        String output = "";
         for (String name : files) {
-            System.out.println(name);
+            output += name + '\n';
+        }
+        if (args[args.length - 1].matches("([A-Z]:){0,1}[/a-zA-Z0-9]+.txt") && args[args.length - 2] == ">"){
+            try {
+                writeToFile(output, args[args.length - 1], false);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        else if (args[args.length - 1].matches("([A-Z]:){0,1}[/a-zA-Z0-9]+.txt") && args[args.length - 2] == ">>"){
+            try {
+                writeToFile(output, args[args.length - 1], true);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        else{
+            System.out.println(output);
         }
     }
 
@@ -287,6 +339,20 @@ public class Terminal {
         }
     }
 
+    public void writeToFile(String output, String path, boolean append) throws FileNotFoundException{
+        File file = new File(path);
+        if (!file.exists()){
+            touch(path);
+        }
+        try {
+            FileOutputStream outputStream = new FileOutputStream(file, append);
+            outputStream.write(output.getBytes());
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void history() {
         for (int i = 0; i < history.size(); i++) {
             System.out.println((i + 1) + " " + history.get(i));
@@ -345,20 +411,16 @@ public class Terminal {
                     break;
                 }
             case "ls":
-                if (args.length == 0) {
-                    ls();
-                    this.history.add("ls");
-                    break;
-                }
-                else if (args[0].equals("-r")) {
-                    lsr();
-                    this.history.add("ls");
-                    break;
-                }
-                else {
-                    System.out.println("Command not found");
-                    break;
-                }
+            if (!args[0].equals("-r")) {
+                ls(args);
+                this.history.add("ls");
+                break;
+            }
+            else{
+                lsr(args);
+                this.history.add("ls");
+                break;
+            }
             case "mkdir":
                 makeDir(args);
                 break;
