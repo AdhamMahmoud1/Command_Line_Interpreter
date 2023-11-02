@@ -94,20 +94,23 @@ public class Terminal {
         for (String name : files) {
             output += name + '\n';
         }
-        if (args[args.length - 1].matches("([A-Z]:){0,1}[/a-zA-Z0-9]+.txt") && args[args.length - 2].equals(">")){
-            try {
-                writeToFile(output, args[args.length - 1], false);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+        
+        if (args.length > 0) {
+            if (args[args.length - 1].matches("([A-Z]:){0,1}[/a-zA-Z0-9]+.txt") && args[args.length - 2].equals(">")) {
+                try {
+                    writeToFile(output, args[args.length - 1], false);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            } else if (args[args.length - 1].matches("([A-Z]:){0,1}[/a-zA-Z0-9]+.txt")
+                    && args[args.length - 2].equals(">>")) {
+                try {
+                    writeToFile(output, args[args.length - 1], true);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        else if (args[args.length - 1].matches("([A-Z]:){0,1}[/a-zA-Z0-9]+.txt") && args[args.length - 2].equals(">>")){
-            try {
-                writeToFile(output, args[args.length - 1], true);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
+        } 
         else{
             System.out.println(output);
         }
