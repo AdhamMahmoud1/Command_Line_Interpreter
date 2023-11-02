@@ -1,6 +1,7 @@
 package CLI;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -204,12 +205,50 @@ public class Terminal {
         }
     }
 
-    public void cat(String path) {
-        System.out.println("cat " + path);
+    public void cat(String firstPath, String secondPath) throws IOException{
+        File file1 = new File(firstPath);
+        File file2 = new File(secondPath);
+        if (!file2.exists()){
+            System.out.println("SecondPath: " + secondPath + " doesn't exist");
+            return;
+        }
+        if (!file1.exists()){
+            System.out.println("FilePath: " + firstPath + " doesn't exist");
+            return;
+        }
+        try(FileInputStream inputStream = new FileInputStream(file1)){
+            byte[] buf = new byte[1024];
+            while (inputStream.read(buf) > 0) {
+                System.out.println(new String(buf, StandardCharsets.UTF_8));
+            }
+        }
+        try(FileInputStream inputStream = new FileInputStream(file2)){
+            byte[] buf = new byte[1024];
+            while (inputStream.read(buf) > 0) {
+                System.out.println(new String(buf, StandardCharsets.UTF_8));
+            }
+        }
     }
 
-    public void wc(String path) {
-        System.out.println("wc " + path);
+    public void wc(String path) throws IOException{
+        File file = new File(path);
+        if (!file.exists()){
+            System.out.println("FilePath: " + path + " doesn't exist");
+            return;
+        }
+        try(FileInputStream inputStream = new FileInputStream(file)){
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader reader = new BufferedReader(inputStreamReader);
+            String line;
+            int nLines = 0, nWords = 0, nChars = 0;
+            while ((line = reader.readLine()) != null){
+                nLines++;
+                String[] words = line.split("\\s+");
+                nWords += words.length;
+                nChars += line.length();
+            }
+            System.out.println(nLines + " " + nWords + " " + nChars + " " + file.getName());
+        }
     }
 
     public void history() {
@@ -307,11 +346,21 @@ public class Terminal {
                 history.add("rm");
                 break;
             case "cat":
-                cat(args[0]);
+                try {
+                    cat(args[0], args[1]);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 history.add("cat");
                 break;
             case "wc":
-                wc(args[0]);
+                try {
+                    wc(args[0]);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 history.add("wc");
                 break;
             case "history":
