@@ -167,7 +167,7 @@ public class Terminal {
     }
     
 
-    public void cp(String src, String dest)throws  IOException {
+    public void cp(String src, String dest) throws IOException {
         File file = new File(src);
         if (!file.exists()) {
             System.out.println("File doesn't exist");
@@ -183,6 +183,46 @@ public class Terminal {
                 int len;
                 while ((len = in.read(buf)) > 0) {
                     out.write(buf, 0, len);
+                }
+            }
+        }
+    }
+    
+    public void cpr(String src, String dest) throws IOException {
+        File sourceDir = new File(src);
+        File destDir = new File(dest);
+
+        // Check if the source directory exists
+        if (!sourceDir.exists()) {
+            System.out.println("Source directory doesn't exist.");
+            return;
+        }
+
+        // Create the destination directory if it doesn't exist
+        if (!destDir.exists()) {
+            destDir.mkdirs();
+        }
+
+        // List all files and subdirectories in the source directory
+        File[] files = sourceDir.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    // If it's a directory, recursively copy it
+                    cpr(file.getAbsolutePath(), destDir.getAbsolutePath() + File.separator + file.getName());
+                } else {
+                    // If it's a file, copy it to the destination directory
+                    try (InputStream in = new FileInputStream(file)) {
+                        try (OutputStream out = new FileOutputStream(
+                                destDir.getAbsolutePath() + File.separator + file.getName())) {
+                            byte[] buf = new byte[1024];
+                            int len;
+                            while ((len = in.read(buf)) > 0) {
+                                out.write(buf, 0, len);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -335,12 +375,20 @@ public class Terminal {
                 history.add("touch");
                 break;
             case "cp":
-                try {
-                    cp(args[0],args[1]);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (args.length == 2) {
+                    cp(args[0], args[1]);
+                    history.add("cp");
+                    break;
                 }
-                break;
+                else if (args.length == 3 && args[0].equals("-r")) {
+                    cpr(args[1], args[2]);
+                    history.add("cp");
+                    break;
+                }
+                else {
+                    System.out.println("Command not found");
+                    break;
+                }
             case "rm":
                 rm(args[0]);
                 history.add("rm");
@@ -349,7 +397,6 @@ public class Terminal {
                 try {
                     cat(args[0], args[1]);
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 history.add("cat");
@@ -358,7 +405,6 @@ public class Terminal {
                 try {
                     wc(args[0]);
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 history.add("wc");
