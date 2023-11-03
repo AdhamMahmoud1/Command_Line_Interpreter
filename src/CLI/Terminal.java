@@ -284,17 +284,36 @@ public class Terminal {
 
     public Boolean rm(String Filename) {
         String currentDirectory = pwd();
-        File file = new File (currentDirectory , Filename);
-        if (file.exists()){
+        File file = new File(currentDirectory, Filename);
+        if (file.exists()) {
             file.delete();
             System.out.println("The file is deleted successfully");
             return true;
-        }
-        else {
+        } else {
             System.out.println("The file is not in the current directory");
             return false;
         }
     }
+    
+
+    public void cat(String fileName) throws IOException {
+        File file = new File(fileName);
+        if (!file.exists()) {
+            System.out.println("File doesn't exist");
+            return;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+        }
+
+    }
+
+
 
     public void cat(String firstPath, String secondPath) throws IOException{
         File file1 = new File(firstPath);
@@ -414,16 +433,16 @@ public class Terminal {
                     break;
                 }
             case "ls":
-            if (!args[0].equals("-r")) {
-                ls(args);
-                this.history.add("ls");
-                break;
-            }
-            else{
-                lsr(args);
-                this.history.add("ls");
-                break;
-            }
+                if (!args[0].equals("-r")) {
+                    ls(args);
+                    this.history.add("ls");
+                    break;
+                }
+                else{
+                    lsr(args);
+                    this.history.add("ls");
+                    break;
+                }
             case "mkdir":
                 makeDir(args);
                 break;
@@ -457,6 +476,11 @@ public class Terminal {
             case "cat":
                 if (args.length == 2) {
                     cat(args[0], args[1]);
+                    history.add("cat");
+                    break;
+                }
+                else if (args.length == 1) {
+                    cat(args[0]);
                     history.add("cat");
                     break;
                 }
